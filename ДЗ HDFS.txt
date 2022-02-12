@@ -1,0 +1,55 @@
+ДЗ
+--скачиваем файл
+sudo wget https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
+
+--установка zip
+sudo apt install unzip
+
+--распаковка zip
+unzip  ml-latest-small.zip
+
+--просмотр имени контейнеров 
+sudo docker ps
+
+--перенос в контейнер
+sudo docker cp ml-latest-small/ratings.csv affectionate_herschel:/ratings.csv
+
+--запустить Cloudera
+sudo docker run --hostname=quickstart.cloudera --privileged=true -t -i -p 8888:8888 -p 7180:7180 -p 80:80 cloudera-quickstart:latest /usr/bin/docker-quickstart
+
+--проверить наличие файла 
+ls
+bin   dev  home  lib64       media  opt           proc         root  selinux  sys  usr
+boot  etc  lib   lost+found  mnt    packer-files  ratings.csv  sbin  srv      tmp  var
+
+--завершить контейнер 
+sudo docker kill 2aaa972448f1
+
+--скопировать с локальной машины в HDFS
+hdfs dfs -copyFromLocal ratings.csv ratings.csv
+
+--проверить наличие файла в HDFS 
+hdfs dfs -ls
+
+Found 1 items
+-rw-r--r--   1 cloudera cloudera    2483723 2022-02-12 08:17 ratings.csv
+
+--вывод первой колонки
+sudo cat ratings.csv | awk -F, '{print $1}' 
+-- -F - указать разделитель - здесь это запятая
+-- {print $1} - вывод первой колонки из файла
+
+--3. вывод первых 5ти пользователей
+sudo cat ratings.csv | awk -F, '{print $1}'|uniq -c|sort -nrk1|head -n 5
+-- uniq - удаление дубликатов с выводом в начале количества повторов -с
+---nrk1 -т - сортировка по числу, r - в обратном порядке, k - колонка, 1 - номер колонки
+   2698 414
+   2478 599
+   2108 474
+   1864 448
+   1346 274
+
+--4. вывести количество оценок
+sudo cat ratings.csv | awk -F, '{print $1}'|uniq -c|sort -nrk1|head -n 5|awk '{print $1}'|
+head -n 1
+    2698
