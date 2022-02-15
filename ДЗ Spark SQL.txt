@@ -1,0 +1,19 @@
+--скачать
+sudo wget https://gitlab.com/dzwietering/coralwmc/-/raw/master/owid-covid-data.csv
+
+запустить 
+docker-compose up
+
+sudo docker ps
+
+sudo docker cp owid-covid-data.csv 2be5b843c507:/opt/bitnami/spark
+
+sudo docker exec -it 2be5b843c507 bash
+I have no name!@2be5b843c507:/opt/bitnami/spark$ pyspark
+
+df=spark.read.option('header',True).csv('owid-covid-data.csv')
+
+>>> from pyspark.sql.functions import col
+>>> df.select('iso_code','location','total_cases').where((col('date')=='2021-03-31')).orderBy(-col('total_cases')).
+show(15)
+
