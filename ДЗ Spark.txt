@@ -1,0 +1,25 @@
+1) --скачиваем файл
+sudo wget https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
+
+--установка zip
+sudo apt install unzip
+
+--распаковка zip
+unzip  ml-latest-small.zip
+
+2) перемещаем в контейнер
+--смотрим запущенные контейнеры и выбыираем id с портом 8080
+sudo docker ps
+--копируем файл
+sudo docker cp ml-latest-small/movies.csv 2be5b843c507:/opt/bitnami/spark
+--запускаем
+sudo docker exec -it 2be5b843c507 bash
+--переход в режим работы с spark-python
+I have no name!@2be5b843c507:/opt/bitnami/spark$ pyspark
+
+3)--создаем RDD
+>>> data_f=sc.textFile('movies.csv')
+>>> data_f.take(1)
+4) Выводим первые 5 упорядочееных значений:
+>>> data_f.map(lambda x: (x.split(',')[1],1)).reduceByKey(lambda a,b:a+b).takeOrdered(5, key=lambda x: -x[1])
+[('"Christmas Carol', 5), ('"Miserables', 4), ('"Karate Kid', 4), ('"I', 4), ('"Three Musketeers', 4)]
