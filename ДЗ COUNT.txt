@@ -1,0 +1,6 @@
+SELECT  visitid,count(1)
+FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*` 
+where _TABLE_SUFFIX like '2016%'
+group by visitid
+order by 2 desc
+limit 10
