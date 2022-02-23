@@ -1,0 +1,35 @@
+ДЗ
+--установка
+sudo docker run -d -p 0.0.0.0:8123:8123 --volume=/path/to/some/folder/on/disk/some_clickhouse_database:/var/lib/clickhouse --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
+
+--запуск клиента и вход в консоль
+sudo docker run -it --rm --link some-clickhouse-server:clickhouse-server yandex/clickhouse-client --host clickhouse-server
+
+
+--копируем на clickhouse-server файл
+sudo docker cp metrika_sample.tsv 49b839cde7b6:/
+
+--переходим в контейнер
+docker exec -it 49b839cde7b6 bash
+
+
+--на webserver
+clickhouse-client --query "CREATE DATABASE IF NOT EXISTS datasets"
+clickhouse-client --query "CREATE TABLE datasets.metrika (EventDate Date,CounterID UInt32,User
+ID UInt64,RegionID UInt32)ENGINE = MergeTree() PARTITION BY toYYYYMM(EventDate) ORDER BY (CounterID, EventDate, int
+Hash32(UserID))"
+clickhouse-client --query "OPTIMIZE TABLE datasets.metrika FINAL"
+clickhouse-client --query "SELECT COUNT(*) FROM datasets.metrika"
+
+49b839cde7b6 :) show databases
+49b839cde7b6 :) use datasets
+49b839cde7b6 :) select count() from metrika
+--count()-¬
+¦  100000 ¦
+L----------
+
+49b839cde7b6 :) select UserID,count(1) from metrika group by UserID order by count(1) desc  limit 1
+
+---------------UserID-T-count()-¬
+¦ 1313448155240738815 ¦    4439 ¦
+L---------------------+----------
